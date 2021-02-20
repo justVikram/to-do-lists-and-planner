@@ -161,7 +161,7 @@ static void displayCalendar ()
 
 //MARK:-
 
-int main (int argV, const char * argC [])
+int main (int argC, const char * argV [])
 {
     TASK_NODE * ListOfTasks;
 }
