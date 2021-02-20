@@ -64,7 +64,6 @@ static void readNewTask (TASK_NODE * NewTask)
     
 }
 
-
 /// Adds the new task created by the user to the list of tasks being maintained.
 /// @param ListOfTasks Pointer pointing to the address of the original list of tasks
 /// @param NewTask After readNewTask(), pass NewTask to this function.
@@ -115,7 +114,6 @@ static void deleteTaskFromList (TASK_NODE ** ListOfTasks, char TaskTitle [])
 {
     
 }
-
 
 //MARK:-
 
