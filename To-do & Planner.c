@@ -3,7 +3,6 @@
 
 typedef struct Subtask
 {
-    int SubtaskNumber;
     char SubtaskTitle [40];
     int IsCompleted;
 }
