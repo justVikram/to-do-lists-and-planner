@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 typedef struct Subtask
 {
@@ -57,17 +58,11 @@ static void initSubtaskDetails (SUBTASK * ExistingSubtask)
 
 //MARK:-
 
-/// Function to read the details of a new task created by the user.
-/// @param NewTask Use NewTask->TaskDetails.x to fill up the data elements
 static void readNewTask (TASK_NODE * NewTask)
 {
     
 }
 
-
-/// Adds the new task created by the user to the list of tasks being maintained.
-/// @param ListOfTasks Pointer pointing to the address of the original list of tasks
-/// @param NewTask After readNewTask(), pass NewTask to this function.
 static void addNewTask (TASK_NODE * ListOfTasks, TASK_NODE * NewTask)
 {
     //ADD AT POSITION
@@ -115,7 +110,6 @@ static void deleteTaskFromList (TASK_NODE ** ListOfTasks, char TaskTitle [])
 {
     
 }
-
 
 //MARK:-
 
