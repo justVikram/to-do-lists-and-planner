@@ -156,24 +156,24 @@ static void deleteSubtaskList (TASK_NODE ** ExistingTask)
 
 //MARK:-
 
-int isLeapYear (int y)
+static int isLeapYear (int y)
 {
-    return(y % 400 == 0) || ((y % 4 == 0) && (y % 100 != 0));
+    return (y % 400 == 0) || ((y % 4 == 0) && (y % 100 != 0));
 }
 
-int leapYears (int y)
+static int leapYears (int y)
 {
     return y/4 - y/100 + y/400;
 }
 
-int todayOf (int y, int m, int d)
+static int todayOf (int y, int m, int d)
 {
     static int DayOfMonth[] = {-1, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 
     return DayOfMonth[m] + d + ((m > 2 && isLeapYear (y))? 1 : 0);
 }
 
-long days (int y, int m, int d)
+static long days (int y, int m, int d)
 {
     int lastYear;
     lastYear = y - 1;
@@ -181,7 +181,7 @@ long days (int y, int m, int d)
     return 365L * lastYear + leapYears(lastYear) + todayOf(y,m,d);
 }
 
-void calendar (int y, int m) /* display calendar at m y */
+static void calendar (int y, int m) /* display calendar at m y */
 {
     const char *NameOfMonth[] = {NULL, "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"};
@@ -191,14 +191,14 @@ void calendar (int y, int m) /* display calendar at m y */
     int DayOfMonth[] = { -1,31,28,31,30,31,30,31,31,30,31,30,31 };
     int weekOfTopDay;
     int i, day;
-
-    weekOfTopDay = days(y, m, 1) % 7;
+    
+    weekOfTopDay = days (y, m, 1) % 7;
     
     if (isLeapYear (y))
         DayOfMonth [2] = 29;
     
     printf ("\n     %s %d\n%s\n", NameOfMonth[m], y, Week);
-
+    
     for (i = 0; i < weekOfTopDay; i++)
         printf("   ");
     
@@ -217,4 +217,15 @@ void calendar (int y, int m) /* display calendar at m y */
 int main (int argV, const char * argC [])
 {
     TASK_NODE * ListOfTasks;
+    
+    /*                                                          TO DISPLAY CALENDAR FOR A MONTH
+    int year,month;
+    
+    printf("Enter the month and year: ");
+    scanf("%d %d", &month, &year);
+    
+    calendar(year, month);
+    
+    return 0;
+     */
 }
