@@ -12,7 +12,7 @@ SUBTASK;
 typedef struct SubtaskNode
 {
     SUBTASK SubtaskDetails;
-    SUBTASK * next;
+    struct SubtaskNode * next;
 }
 SUBTASK_NODE;
 
@@ -28,7 +28,7 @@ TASK;
 typedef struct TaskNode
 {
     TASK  TaskDetails;
-    struct node * next;
+    struct TaskNode * next;
 }
 TASK_NODE;
 
@@ -50,7 +50,6 @@ static void initTaskDetails (TASK ** ExistingTask)
 
 static void initSubtaskDetails (SUBTASK ** ExistingSubtask)
 {
-    (*ExistingSubtask)->SubtaskNumber = 0;
     strcpy ((*ExistingSubtask)->SubtaskTitle, "<enter subtask title here>");
     (*ExistingSubtask)->IsCompleted = 0;
 }
@@ -114,22 +113,55 @@ static void deleteTaskFromList (TASK_NODE ** ListOfTasks, char TaskTitle [])
 
 static void readNewSubtask (SUBTASK_NODE ** NewSubtask)
 {
-    
+    printf ("Enter subtask title:");
+    scanf ("%s", (*NewSubtask)->SubtaskDetails.SubtaskTitle);
+}
+
+static void viewSubtask (const SUBTASK_NODE * ExistingSubtask)
+{
+    printf ("%s", ExistingSubtask->SubtaskDetails.SubtaskTitle);
 }
 
 static void addNewSubtask (TASK_NODE ** ExistingTask, SUBTASK_NODE * NewSubtask)
 {
+    if (! (*ExistingTask)->TaskDetails.ListOfSubtasks)
+        (*ExistingTask)->TaskDetails.ListOfSubtasks = NewSubtask;
     
+    else
+    {
+        SUBTASK_NODE * cur = (*ExistingTask)->TaskDetails.ListOfSubtasks;
+        
+        while (cur->next)
+            cur = cur->next;
+        
+        cur->next = NewSubtask;
+    }
 }
 
 static void viewListOfSubtasks (const TASK_NODE * ExistingTask)
 {
+    int i = 1;
+    SUBTASK_NODE * cur = ExistingTask->TaskDetails.ListOfSubtasks;
     
+    while (cur)
+    {
+        printf ("Subtask %d:\n", i++);
+        viewSubtask (cur);
+    }
 }
 
-static void markSubtaskAsCompleted (SUBTASK_NODE ** ListOfSubtasks, int SubtaskNumber)
+static void markSubtaskAsCompleted (TASK_NODE ** ExistingTask, char SubtaskTitle [])
 {
+    SUBTASK_NODE * cur = (*ExistingTask)->TaskDetails.ListOfSubtasks;
     
+    while (cur && (strcmp (cur->SubtaskDetails.SubtaskTitle, SubtaskTitle) != 0))
+        cur = cur->next;
+    
+    if (! cur)
+        printf ("ERROR -- Check the title and try again.\n");
+    
+    else
+        cur->SubtaskDetails.IsCompleted = 1;
 }
 
 static void markAllSubtasksAsCompleted (TASK_NODE ** ExistingTask)
