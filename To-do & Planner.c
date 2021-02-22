@@ -113,7 +113,7 @@ static void deleteTaskFromList (TASK_NODE ** ListOfTasks, char TaskTitle [])
 
 //MARK:-
 
-static void readNewSubtask (SUBTASK_NODE * NewSubtask)
+static void readNewSubtask (SUBTASK_NODE ** NewSubtask)
 {
     
 }
