@@ -40,30 +40,30 @@ static void initListOfTasks (TASK_NODE ** ListOfTasks)
     ListOfTasks = NULL;
 }
 
-static void initTaskDetails (TASK * ExistingTask)
+static void initTaskDetails (TASK ** ExistingTask)
 {
-    strcpy (ExistingTask->TaskTitle, "<enter task title here>");
-    strcpy (ExistingTask->ScheduledDate, "00-00-00");
-    ExistingTask->IsCompleted = 0;
-    ExistingTask->ListOfSubtasks = NULL;
+    strcpy ((*ExistingTask)->TaskTitle, "<enter task title here>");
+    strcpy ((*ExistingTask)->ScheduledDate, "00-00-00");
+    (*ExistingTask)->IsCompleted = 0;
+    (*ExistingTask)->ListOfSubtasks = NULL;
     
 }
 
-static void initSubtaskDetails (SUBTASK * ExistingSubtask)
+static void initSubtaskDetails (SUBTASK ** ExistingSubtask)
 {
-    ExistingSubtask->SubtaskNumber = 0;
-    strcpy (ExistingSubtask->SubtaskTitle, "<enter subtask title here>");
-    ExistingSubtask->IsCompleted = 0;
+    (*ExistingSubtask)->SubtaskNumber = 0;
+    strcpy ((*ExistingSubtask)->SubtaskTitle, "<enter subtask title here>");
+    (*ExistingSubtask)->IsCompleted = 0;
 }
 
 //MARK:-
 
-static void readNewTask (TASK_NODE * NewTask)
+static void readNewTask (TASK_NODE ** NewTask)
 {
     
 }
 
-static void addNewTask (TASK_NODE * ListOfTasks, TASK_NODE * NewTask)
+static void addNewTask (TASK_NODE ** ListOfTasks, TASK_NODE * NewTask)
 {
     //ADD AT POSITION
 }
@@ -78,12 +78,12 @@ static void viewListOfTasks (const TASK_NODE * ListOfTasks)
     //IN ASCENDING ORDER BY DATE
 }
 
-static void viewTasksOnGivenDate (TASK_NODE ** ListOfTasks, char ScheduledDate [])
+static void viewTasksOnGivenDate (const TASK_NODE * ListOfTasks, char ScheduledDate [])
 {
     
 }
 
-static void viewCompletedTasks (TASK_NODE ** ListOfTasks)
+static void viewCompletedTasks (const TASK_NODE * ListOfTasks)
 {
     
 }
