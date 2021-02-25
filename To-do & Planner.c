@@ -4,9 +4,9 @@
 
 typedef struct date
 {
-   int month;
-   int day;
-   int year;
+    int month;
+    int day;
+    int year;
 }
 DATE;
 
@@ -43,26 +43,28 @@ TASK_NODE;
 int compareDates (DATE d1, DATE d2)
 {
     if (d1.year < d2.year)
-       return -1;
-
+        return -1;
+    
     else if (d1.year > d2.year)
-       return 1;
-
-    if (d1.year == d2.year)
-    {
-         if (d1.month<d2.month)
-              return -1;
-         else if (d1.month>d2.month)
-              return 1;
-         else if (d1.day<d2.day)
-              return -1;
-         else if(d1.day>d2.day)
-              return 1;
-         else
-              return 0;
-    }
+        return 1;
+    
     else
-        return 0;
+    {
+        if (d1.month<d2.month)
+            return -1;
+        
+        else if (d1.month>d2.month)
+            return 1;
+        
+        else if (d1.day<d2.day)
+            return -1;
+        
+        else if(d1.day>d2.day)
+            return 1;
+        
+        else
+            return 0;
+    }
 }
 
 //MARK:-
@@ -75,7 +77,7 @@ static void initListOfTasks (TASK_NODE ** ListOfTasks)
 static void initTaskDetails (TASK ** ExistingTask)
 {
     strcpy ((*ExistingTask)->TaskTitle, "<enter task title here>");
-
+    
     (*ExistingTask)->ScheduledDate.day = 00;
     (*ExistingTask)->ScheduledDate.month = 00;
     (*ExistingTask)->ScheduledDate.year = 0000;
@@ -122,7 +124,7 @@ static void viewCompletedTasks (const TASK_NODE * ListOfTasks)
 {
     const TASK_NODE *cur = ListOfTasks;
     SUBTASK_NODE *cur1;
-
+    
     while (cur)
     {
         if (cur->TaskDetails.IsCompleted == 1)
@@ -132,7 +134,7 @@ static void viewCompletedTasks (const TASK_NODE * ListOfTasks)
             while (cur1)
             {
                 printf("%s\n", cur1->SubtaskDetails.SubtaskTitle);
-
+                
                 cur1 = cur1->next;
             }
         }
@@ -147,7 +149,7 @@ static int searchByTaskTitle(const TASK_NODE *ListOfTasks, char TaskTitle[])
     {
         if (strcmp (cur->TaskDetails.TaskTitle, TaskTitle) == 0)
             return 1;
-            
+        
         cur = cur->next;
     }
     return 0;
@@ -156,17 +158,17 @@ static int searchByTaskTitle(const TASK_NODE *ListOfTasks, char TaskTitle[])
 static void markTaskAsCompleted (TASK_NODE ** ListOfTasks, char TaskTitle [])
 {
     TASK_NODE *cur = (*ListOfTasks);
-
+    
     while (cur && (strcmp(cur->TaskDetails.TaskTitle, TaskTitle)) != 0)
     {
-
+        
         cur = cur->next;
     }
     if (cur)
     {
         cur->TaskDetails.IsCompleted = 1;
         SUBTASK_NODE *ListOfSubtasks = cur->TaskDetails.ListOfSubtasks;
-
+        
         while (ListOfSubtasks)
         {
             ListOfSubtasks->SubtaskDetails.IsCompleted = 1;
@@ -287,7 +289,7 @@ static void markAllSubtasksAsCompleted (TASK_NODE ** ExistingTask)
 
 static void deleteSubtask (SUBTASK_NODE ** ListOfSubtasks, char SubtaskTitle [])
 {
-     SUBTASK_NODE *cur = *ListOfSubtasks;
+    SUBTASK_NODE *cur = *ListOfSubtasks;
     SUBTASK_NODE *prev = NULL;
     while (cur)
     {
@@ -340,7 +342,7 @@ static int leapYears (int y)
 static int todayOf (int y, int m, int d)
 {
     static int DayOfMonth[] = {-1, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
-
+    
     return DayOfMonth[m] + d + ((m > 2 && isLeapYear (y))? 1 : 0);
 }
 
@@ -371,7 +373,7 @@ static void calendar (int y, int m) /* display calendar at m y */
     printf ("\n     %s %d\n%s\n", NameOfMonth[m], y, Week);
     
     for (i = 0; i < weekOfTopDay; i++)
-        printf("   ");
+    printf("   ");
     
     for (i = weekOfTopDay, day = 1; day <= DayOfMonth [m]; i++, day++)
     {
@@ -390,13 +392,13 @@ int main (int argV, const char * argC [])
     TASK_NODE * ListOfTasks;
     
     /*                                                          TO DISPLAY CALENDAR FOR A MONTH
-    int year,month;
-    
-    printf("Enter the month and year: ");
-    scanf("%d %d", &month, &year);
-    
-    calendar(year, month);
-    
-    return 0;
+     int year,month;
+     
+     printf("Enter the month and year: ");
+     scanf("%d %d", &month, &year);
+     
+     calendar(year, month);
+     
+     return 0;
      */
 }
