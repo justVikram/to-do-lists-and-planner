@@ -32,6 +32,37 @@ typedef struct TaskNode
 }
 TASK_NODE;
 
+typedef struct date 
+{
+   int month;
+   int day;
+   int year;
+}
+DATE;
+
+int compareDates (DATE d1, DATE d2)
+{
+    if (d1.year < d2.year)
+       return -1;
+
+    else if (d1.year > d2.year)
+       return 1;
+
+    if (d1.year == d2.year)
+    {
+         if (d1.month<d2.month)
+              return -1;
+         else if (d1.month>d2.month)
+              return 1;
+         else if (d1.day<d2.day)
+              return -1;
+         else if(d1.day>d2.day)
+              return 1;
+         else
+              return 0;
+    }
+}
+
 //MARK:-
 
 static void initListOfTasks (TASK_NODE ** ListOfTasks)
@@ -94,7 +125,7 @@ static TASK_NODE * searchByTaskTitle (const TASK_NODE * ListOfTasks, char TaskTi
     
 }
 
-static void markTaskAsCompleted (TASK_NODE ** ListOfTasks, int TaskNumber)
+static void markTaskAsCompleted (TASK_NODE ** ListOfTasks, char TaskTitle [])
 {
     
 }
