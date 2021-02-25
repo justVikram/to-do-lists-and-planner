@@ -2,6 +2,14 @@
 #include <string.h>
 #include <stdlib.h>
 
+typedef struct date 
+{
+   int month;
+   int day;
+   int year;
+}
+DATE;
+
 typedef struct Subtask
 {
     char SubtaskTitle [40];
@@ -19,7 +27,7 @@ SUBTASK_NODE;
 typedef struct Task
 {
     char TaskTitle [40];                        // To store the actual task
-    char ScheduledDate [10];
+    DATE ScheduledDate;
     int IsCompleted;                            // 1 -> Completed, 0 -> Not completed
     SUBTASK_NODE * ListOfSubtasks;
 }
@@ -31,14 +39,6 @@ typedef struct TaskNode
     struct TaskNode * next;
 }
 TASK_NODE;
-
-typedef struct date 
-{
-   int month;
-   int day;
-   int year;
-}
-DATE;
 
 int compareDates (DATE d1, DATE d2)
 {
@@ -107,7 +107,7 @@ static void viewListOfTasks (const TASK_NODE * ListOfTasks)
     //IN ASCENDING ORDER BY DATE
 }
 
-static void viewTasksOnGivenDate (const TASK_NODE * ListOfTasks, char ScheduledDate [])
+static void viewTasksOnGivenDate (const TASK_NODE * ListOfTasks, DATE ScheduledDate)
 {
     
 }
