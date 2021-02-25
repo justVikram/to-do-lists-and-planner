@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-typedef struct date 
+typedef struct date
 {
    int month;
    int day;
@@ -61,6 +61,8 @@ int compareDates (DATE d1, DATE d2)
          else
               return 0;
     }
+    else
+        return 0;
 }
 
 //MARK:-
@@ -118,30 +120,104 @@ static void viewTasksOnGivenDate (const TASK_NODE * ListOfTasks, DATE ScheduledD
 
 static void viewCompletedTasks (const TASK_NODE * ListOfTasks)
 {
-    
+    const TASK_NODE *cur = ListOfTasks;
+    SUBTASK_NODE *cur1;
+
+    while (cur)
+    {
+        if (cur->TaskDetails.IsCompleted == 1)
+        {
+            printf("%s\n", cur->TaskDetails.TaskTitle);
+            cur1 = cur->TaskDetails.ListOfSubtasks;
+            while (cur1)
+            {
+                printf("%s\n", cur1->SubtaskDetails.SubtaskTitle);
+
+                cur1 = cur1->next;
+            }
+        }
+        cur = cur->next;
+    }
 }
 
-static TASK_NODE * searchByTaskTitle (const TASK_NODE * ListOfTasks, char TaskTitle [])
+static int searchByTaskTitle(const TASK_NODE *ListOfTasks, char TaskTitle[])
 {
-    TASK_NODE * LocatedTask = NULL;
-    
-    return LocatedTask;
-    
+    const TASK_NODE *cur = ListOfTasks;
+    while (cur)
+    {
+        if (strcmp (cur->TaskDetails.TaskTitle, TaskTitle) == 0)
+            return 1;
+            
+        cur = cur->next;
+    }
+    return 0;
 }
 
 static void markTaskAsCompleted (TASK_NODE ** ListOfTasks, char TaskTitle [])
 {
-    
+    TASK_NODE *cur = (*ListOfTasks);
+
+    while (cur && (strcmp(cur->TaskDetails.TaskTitle, TaskTitle)) != 0)
+    {
+
+        cur = cur->next;
+    }
+    if (cur)
+    {
+        cur->TaskDetails.IsCompleted = 1;
+        SUBTASK_NODE *ListOfSubtasks = cur->TaskDetails.ListOfSubtasks;
+
+        while (ListOfSubtasks)
+        {
+            ListOfSubtasks->SubtaskDetails.IsCompleted = 1;
+            ListOfSubtasks = ListOfSubtasks->next;
+        }
+    }
 }
 
 static void markAllTasksAsCompleted (TASK_NODE ** ListOfTasks)
 {
-    
+    TASK_NODE *cur = (*ListOfTasks);
+    SUBTASK_NODE *cur1;
+    while (cur)
+    {
+        cur->TaskDetails.IsCompleted = 1;
+        cur1 = cur->TaskDetails.ListOfSubtasks;
+        while (cur1)
+        {
+            cur1->SubtaskDetails.IsCompleted = 1;
+            cur1 = cur1->next;
+        }
+        cur = cur->next;
+    }
 }
 
 static void deleteTaskFromList (TASK_NODE ** ListOfTasks, char TaskTitle [])
 {
-    
+    TASK_NODE *cur = *ListOfTasks;
+    TASK_NODE *prev = NULL;
+    while (cur)
+    {
+        if (strcmp(cur->TaskDetails.TaskTitle, TaskTitle) == 0)
+        {
+            if (cur == *ListOfTasks)
+            {
+                *ListOfTasks = cur->next;
+                free(cur);
+            }
+            else
+            {
+                prev->next = cur->next;
+                free(cur);
+                cur = prev->next;
+            }
+        }
+        else
+        {
+            prev = cur;
+            cur = cur->next;
+        }
+    }
 }
 
 //MARK:-
@@ -201,17 +277,52 @@ static void markSubtaskAsCompleted (TASK_NODE ** ExistingTask, char SubtaskTitle
 
 static void markAllSubtasksAsCompleted (TASK_NODE ** ExistingTask)
 {
-    
+    SUBTASK_NODE *cur = (*ExistingTask)->TaskDetails.ListOfSubtasks;
+    while (cur)
+    {
+        cur->SubtaskDetails.IsCompleted = 1;
+        cur = cur->next;
+    }
 }
 
 static void deleteSubtask (SUBTASK_NODE ** ListOfSubtasks, char SubtaskTitle [])
 {
-    
+     SUBTASK_NODE *cur = *ListOfSubtasks;
+    SUBTASK_NODE *prev = NULL;
+    while (cur)
+    {
+        if (strcmp(cur->SubtaskDetails.SubtaskTitle, SubtaskTitle) == 0)
+        {
+            if (cur == *ListOfSubtasks)
+            {
+                *ListOfSubtasks = cur->next;
+                free(cur);
+            }
+            else
+            {
+                prev->next = cur->next;
+                free(cur);
+                cur = prev->next;
+            }
+        }
+        else
+        {
+            prev = cur;
+            cur = cur->next;
+        }
+    }
 }
 
 static void deleteSubtaskList (TASK_NODE ** ExistingTask)
 {
-    
+    SUBTASK_NODE *head = (*ExistingTask)->TaskDetails.ListOfSubtasks;
+    SUBTASK_NODE *cur = head;
+    while (cur)
+    {
+        head = cur->next;
+        free(cur);
+        cur = head;
+    }
 }
 
 //MARK:-
