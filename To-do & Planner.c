@@ -73,7 +73,11 @@ static void initListOfTasks (TASK_NODE ** ListOfTasks)
 static void initTaskDetails (TASK ** ExistingTask)
 {
     strcpy ((*ExistingTask)->TaskTitle, "<enter task title here>");
-    strcpy ((*ExistingTask)->ScheduledDate, "00-00-00");
+
+    (*ExistingTask)->ScheduledDate.day = 00;
+    (*ExistingTask)->ScheduledDate.month = 00;
+    (*ExistingTask)->ScheduledDate.year = 0000;
+    
     (*ExistingTask)->IsCompleted = 0;
     (*ExistingTask)->ListOfSubtasks = NULL;
     
