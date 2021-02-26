@@ -67,6 +67,11 @@ int compareDates (DATE d1, DATE d2)
     }
 }
 
+static void getDate (DATE * GivenDate)
+{
+    scanf ("%d %*c %d %*c %d", &GivenDate->day, &GivenDate->month, &GivenDate->year);
+}
+
 //MARK:-
 
 static void initListOfTasks (TASK_NODE ** ListOfTasks)
@@ -74,16 +79,16 @@ static void initListOfTasks (TASK_NODE ** ListOfTasks)
     ListOfTasks = NULL;
 }
 
-static void initTaskDetails (TASK ** ExistingTask)
+static void initTaskDetails (TASK_NODE ** ExistingTask)
 {
-    strcpy ((*ExistingTask)->TaskTitle, "<enter task title here>");
+    strcpy ((*ExistingTask)->TaskDetails.TaskTitle, "<enter task title here>");
     
-    (*ExistingTask)->ScheduledDate.day = 00;
-    (*ExistingTask)->ScheduledDate.month = 00;
-    (*ExistingTask)->ScheduledDate.year = 0000;
+    (*ExistingTask)->TaskDetails.ScheduledDate.day = 00;
+    (*ExistingTask)->TaskDetails.ScheduledDate.month = 00;
+    (*ExistingTask)->TaskDetails.ScheduledDate.year = 0000;
     
-    (*ExistingTask)->IsCompleted = 0;
-    (*ExistingTask)->ListOfSubtasks = NULL;
+    (*ExistingTask)->TaskDetails.IsCompleted = 0;
+    (*ExistingTask)->TaskDetails.ListOfSubtasks = NULL;
     
 }
 
@@ -91,6 +96,7 @@ static void initSubtaskDetails (SUBTASK_NODE ** ExistingSubtask)
 {
     strcpy ((*ExistingSubtask)->SubtaskDetails.SubtaskTitle, "<enter subtask title here>");
     (*ExistingSubtask)->SubtaskDetails.IsCompleted = 0;
+    (*ExistingSubtask)->next = NULL;
 }
 
 //MARK:-
@@ -103,7 +109,8 @@ static void readNewSubtask (SUBTASK_NODE ** NewSubtask)
 
 static void viewSubtask (const SUBTASK_NODE * ExistingSubtask)
 {
-    printf ("%s", ExistingSubtask->SubtaskDetails.SubtaskTitle);
+    if (ExistingSubtask->SubtaskDetails.IsCompleted == 0)
+        printf ("%s\n", ExistingSubtask->SubtaskDetails.SubtaskTitle);
 }
 
 static void addNewSubtask (TASK_NODE ** ExistingTask, SUBTASK_NODE * NewSubtask)
@@ -131,6 +138,7 @@ static void viewListOfSubtasks (const TASK_NODE * ExistingTask)
     {
         printf ("Subtask %d:\n", i++);
         viewSubtask (cur);
+        cur = cur->next;
     }
 }
 
@@ -170,12 +178,13 @@ static void deleteSubtask (SUBTASK_NODE ** ListOfSubtasks, char SubtaskTitle [])
             {
                 *ListOfSubtasks = cur->next;
                 free(cur);
+                return;
             }
             else
             {
-                prev->next = cur->next;
-                free(cur);
-                cur = prev->next;
+                if (prev)
+                    prev->next = cur->next;
+                return;
             }
         }
         else
@@ -188,13 +197,11 @@ static void deleteSubtask (SUBTASK_NODE ** ListOfSubtasks, char SubtaskTitle [])
 
 static void deleteSubtaskList (TASK_NODE ** ExistingTask)
 {
-    SUBTASK_NODE *head = (*ExistingTask)->TaskDetails.ListOfSubtasks;
-    SUBTASK_NODE *cur = head;
+    SUBTASK_NODE *cur = (*ExistingTask)->TaskDetails.ListOfSubtasks;
     while (cur)
     {
-        head = cur->next;
-        free(cur);
-        cur = head;
+        (*ExistingTask)->TaskDetails.ListOfSubtasks = cur->next;
+        cur = (*ExistingTask)->TaskDetails.ListOfSubtasks;
     }
 }
 
@@ -202,103 +209,117 @@ static void deleteSubtaskList (TASK_NODE ** ExistingTask)
 
 static void readNewTask (TASK_NODE ** NewTask)
 {
+    printf ("Enter task title:");
     scanf("%s",(*NewTask)->TaskDetails.TaskTitle);
-    scanf("%d",&(*NewTask)->TaskDetails.ScheduledDate.day);
-    scanf("%d",&(*NewTask)->TaskDetails.ScheduledDate.month);
-    scanf("%d",&(*NewTask)->TaskDetails.ScheduledDate.year);
+    printf ("Enter scheduled date in the form of DD/MM/YYYY\n");
+    getDate (&(*NewTask)->TaskDetails.ScheduledDate);
     (*NewTask)->next=NULL;
 }
 
+
 static void addNewTask (TASK_NODE ** ListOfTasks, TASK_NODE * NewTask)
 {
-    //ADD AT POSITION
-    TASK_NODE *cur;
-    char res;
-    if(*ListOfTasks==NULL)
-        *ListOfTasks=NewTask;
+    TASK_NODE *cur=(*ListOfTasks);
+    TASK_NODE *prev=NULL;
+    int res;
+    
+    if (*ListOfTasks==NULL)
+    {
+        NewTask->next=(*ListOfTasks);
+        (*ListOfTasks)=NewTask;
+    }
+    
     else
     {
-        cur=*ListOfTasks;
-        DATE date1 = cur->TaskDetails.ScheduledDate;
-        DATE date2 = NewTask->TaskDetails.ScheduledDate;
-        res = compareDates(date1, date2);
-        if(res<0)  //Add at beginning
-            NewTask->next=cur;
-        else
+        cur=(*ListOfTasks);
+        
+        while(cur)
         {
-            while(cur && res>=0)
+            DATE date2 = cur->TaskDetails.ScheduledDate;
+            DATE date1 = NewTask->TaskDetails.ScheduledDate;
+            res = compareDates(date1,date2);
+            if(res <= 0)
             {
-                cur=cur->next;
-                date1=cur->TaskDetails.ScheduledDate;
-                date2=NewTask->TaskDetails.ScheduledDate;
-                res = compareDates (date1, date2);
-            }
-            if(res>0)
-            {
-                if(!cur->next) //When ListOfTasks has a single node and add at beginning
-                    cur->next=NewTask;
-                else
+                if (! prev)
                 {
-                    NewTask->next=cur->next; //add in between two nodes
-                    cur->next=NewTask;
+                    NewTask->next = cur;
+                    *ListOfTasks = NewTask;
+                    break;
                 }
+                
+                if(prev)
+                    prev->next=NewTask;
+                
+                NewTask->next=cur;
+                break;
+                
             }
-            else if(res==0)
-            {
-                SUBTASK_NODE *NewSubtask = NULL;
-                initSubtaskDetails (&NewSubtask);
-                readNewSubtask(&NewSubtask);
-                addNewSubtask(&NewTask,NewSubtask);
-            }
+            
+            prev=cur;
+            cur=cur->next;
         }
+        if (prev)
+            prev->next=NewTask;
+    
+        NewTask->next=cur;
     }
 }
 
 static void viewTask (const TASK_NODE * ExistingTask)
 {
     if (ExistingTask == NULL)
-         printf("No task scheduled.\n");
+        printf("No task scheduled.\n");
     
-     else
-     {
-         printf("%s\n",ExistingTask->TaskDetails.TaskTitle);
-         printf("%d ",ExistingTask->TaskDetails.ScheduledDate.day);
-         printf("%d ",ExistingTask->TaskDetails.ScheduledDate.month);
-         printf("%d\n",ExistingTask->TaskDetails.ScheduledDate.year);
-
-     }
+    else
+    {
+        if (ExistingTask->TaskDetails.IsCompleted == 0)
+        {
+        
+        printf("%s\n",ExistingTask->TaskDetails.TaskTitle);
+        printf ("Scheduled for: ");
+        printf ("%d/%d/%d\n", ExistingTask->TaskDetails.ScheduledDate.day, ExistingTask->TaskDetails.ScheduledDate.month, ExistingTask->TaskDetails.ScheduledDate.year);
+        
+        if (ExistingTask->TaskDetails.ListOfSubtasks)
+            viewListOfSubtasks(ExistingTask);
+        }
+    }
 }
 
 static void viewListOfTasks (const TASK_NODE * ListOfTasks)
 {
     //IN ASCENDING ORDER BY DATE
-    while(ListOfTasks)
+    const TASK_NODE * cur = ListOfTasks;
+    while(cur)
     {
-        printf("%s",ListOfTasks->TaskDetails.TaskTitle);
-        printf("%d",ListOfTasks->TaskDetails.ScheduledDate.day);
-        printf("%d",ListOfTasks->TaskDetails.ScheduledDate.month);
-        printf("%d",ListOfTasks->TaskDetails.ScheduledDate.year);
+        viewTask (cur);
         ListOfTasks=ListOfTasks->next;
+        
+        printf ("\n");
+        cur = cur->next;
     }
 }
 
-static void viewTasksOnGivenDate (const TASK_NODE * ListOfTasks, DATE GivenDate)
+static int viewTasksOnGivenDate (const TASK_NODE * ListOfTasks, DATE GivenDate)
 {
     const TASK_NODE *cur = ListOfTasks;
+    int flag = 0;
     
     if(ListOfTasks == NULL)
-        printf("No tasks scheduled.");
+        printf("Task list empty.\n");
     
     else
     {
         while(cur)
         {
             if (! compareDates(cur->TaskDetails.ScheduledDate, GivenDate))
+            {
                 viewTask(cur);
-            
+                flag = 1;
+            }
             cur=cur->next;
         }
     }
+    return flag;
 }
 
 static void viewCompletedTasks (const TASK_NODE * ListOfTasks)
@@ -306,12 +327,19 @@ static void viewCompletedTasks (const TASK_NODE * ListOfTasks)
     const TASK_NODE *cur = ListOfTasks;
     SUBTASK_NODE *cur1;
     
+    if (! ListOfTasks)
+        printf ("Task list empty.\n");
+    
     while (cur)
     {
         if (cur->TaskDetails.IsCompleted == 1)
         {
-            printf("%s\n", cur->TaskDetails.TaskTitle);
+            printf ("Task:\n");
+            printf("%s\n\n", cur->TaskDetails.TaskTitle);
             cur1 = cur->TaskDetails.ListOfSubtasks;
+            
+            printf ("Subtask(s):\n");
+            
             while (cur1)
             {
                 printf("%s\n", cur1->SubtaskDetails.SubtaskTitle);
@@ -320,20 +348,21 @@ static void viewCompletedTasks (const TASK_NODE * ListOfTasks)
             }
         }
         cur = cur->next;
+        printf ("\n");
     }
 }
 
-static int searchByTaskTitle(const TASK_NODE *ListOfTasks, char TaskTitle[])
+static TASK_NODE * searchByTaskTitle(TASK_NODE *ListOfTasks, char TaskTitle[])
 {
-    const TASK_NODE *cur = ListOfTasks;
+    TASK_NODE *cur = ListOfTasks;
     while (cur)
     {
         if (strcmp (cur->TaskDetails.TaskTitle, TaskTitle) == 0)
-            return 1;
+            return cur;
         
         cur = cur->next;
     }
-    return 0;
+    return NULL;
 }
 
 static void markTaskAsCompleted (TASK_NODE ** ListOfTasks, char TaskTitle [])
@@ -386,13 +415,13 @@ static void deleteTaskFromList (TASK_NODE ** ListOfTasks, char TaskTitle [])
             if (cur == *ListOfTasks)
             {
                 *ListOfTasks = cur->next;
-                free(cur);
+                return;
             }
             else
             {
-                prev->next = cur->next;
-                free(cur);
-                cur = prev->next;
+                if (prev)
+                    prev->next = cur->next;
+                return;
             }
         }
         else
@@ -467,34 +496,238 @@ int main (int argV, const char * argC [])
 {
     TASK_NODE *ListOfTasks;
     initListOfTasks(&ListOfTasks);
-
+    
+    char subtaskTitle [100];
+    char taskTitle[100];
+    
     while (1)
     {
         int ch;
-        printf("enter choice");
+        printf("Enter choice:");
         scanf("%d", &ch);
-
+        
         switch (ch)
         {
-        case 1:
-            printf("add new task\n");
-            TASK_NODE *NewTask = (TASK_NODE *)malloc(sizeof(TASK_NODE));
-
-            
+            case 0:
+                printf ("Welcome. Please enter the date in the form of MM/YY to view the calender for the required date.\n");
+                
+                int year,month;
+                scanf("%d %*c %d", &month, &year);
+                calendar(year, month);
+                
+                break;
+                
+                
+            case 1:
+                printf("Add a new task.\n");
+                
+                TASK_NODE  *NewTask = (TASK_NODE *)malloc(sizeof(TASK_NODE));
+                initTaskDetails (&NewTask);
+                
+                printf ("Enter the task details mentioned below.\n");
+                readNewTask (&NewTask);
+                
+                addNewTask (&ListOfTasks, NewTask);
+                printf ("Task added successfully.\n");
+                
+                break;
+                
+            case 2:
+                printf ("Add subtask to a task.\n");
+                
+                printf ("Enter title of task for which you'd like to add a subtask:");
+                char TaskTitle [20];
+                scanf ("%s", TaskTitle);
+                
+                TASK_NODE * ExistingTask = searchByTaskTitle(ListOfTasks, TaskTitle);
+                
+                if (ExistingTask)
+                {
+                    SUBTASK_NODE * NewSubtask = (SUBTASK_NODE *)malloc(sizeof(SUBTASK_NODE));
+                    initSubtaskDetails (&NewSubtask);
+                    
+                    printf ("Enter subtask details below.\n");
+                    readNewSubtask (&NewSubtask);
+                    
+                    addNewSubtask(&ExistingTask, NewSubtask);
+                }
+                
+                else
+                    printf ("The title did not match to any existing task. Try again.\n");
+                
+                break;
+                
+            case 3:
+                printf ("View a task.\n");
+                
+                printf ("Enter title of task you want to view:");
+                scanf ("%s", TaskTitle);
+                
+                ExistingTask = searchByTaskTitle(ListOfTasks, TaskTitle);
+                
+                if (ExistingTask)
+                    viewTask (ExistingTask);
+                
+                else
+                    printf ("The title did not match to any existing task. Try again.\n");
+                
+                break;
+                
+            case 4:
+                printf ("View all tasks.\n\n");
+                
+                viewListOfTasks (ListOfTasks);
+                
+                break;
+                
+            case 5:
+                printf ("View tasks on a given date.\n");
+                
+                DATE GivenDate;
+                printf ("Enter date:");
+                getDate (&GivenDate);
+                
+                if (! viewTasksOnGivenDate(ListOfTasks, GivenDate))
+                    printf ("ERROR - No tasks found scheduled on the given date.\n");
+                    
+                break;
+                
+            case 6:
+                printf ("View completed tasks.\n\n");
+                
+                viewCompletedTasks(ListOfTasks);
+                
+                break;
+                
+            case 7:
+                printf ("Search for a task.\n");
+                
+                printf ("Enter title of task you want to search for:");
+                scanf ("%s", TaskTitle);
+                
+                ExistingTask = searchByTaskTitle(ListOfTasks, TaskTitle);
+                
+                if (ExistingTask)
+                    printf ("Task was found.\n");
+                
+                else
+                    printf ("The title did not match to any existing task. Try again.\n");
+                
+                break;
+                
+            case 8:
+                printf ("Mark a task as completed.\n");
+                
+                printf ("Enter title of task you want to mark as completed:");
+                scanf ("%s", TaskTitle);
+                
+                ExistingTask = searchByTaskTitle(ListOfTasks, TaskTitle);
+                
+                if (ExistingTask)
+                    markTaskAsCompleted(&ListOfTasks, TaskTitle);
+                
+                else
+                    printf ("The title did not match to any existing task. Try again.\n");
+                
+                break;
+                
+            case 9:
+                printf ("Mark all tasks as completed.\n");
+                
+                int IsSure;
+                printf ("Are you sure?\n");
+                scanf ("%d", &IsSure);
+                
+                if (IsSure)
+                    markAllTasksAsCompleted (&ListOfTasks);
+                
+                break;
+                
+            case 10:
+                printf ("Delete a task from the list.\n");
+                
+                printf ("Enter title of task you want to delete:");
+                scanf ("%s", TaskTitle);
+                
+                ExistingTask = searchByTaskTitle(ListOfTasks, TaskTitle);
+                
+                if (ExistingTask)
+                    deleteTaskFromList (&ListOfTasks, TaskTitle);
+                
+                else
+                    printf ("The title did not match to any existing task. Try again.\n");
+                
+                break;
+                
+            case 11:
+                printf("Enter Title of Task whose subtask is to be marked as complet:e\n");
+                scanf("%s", taskTitle);
+                ExistingTask = searchByTaskTitle(ListOfTasks, TaskTitle);
+                
+                if (ExistingTask)
+                {
+                    printf("Enter Title of Subtask to be marked as completed\n");
+                    scanf("%s", subtaskTitle);
+                    markSubtaskAsCompleted(&ExistingTask,subtaskTitle);
+                }
+                
+                else
+                    printf("The title did not match to any existing task. Try again.\n");
+                
+                break;
+                
+            case 12:
+                printf("Enter Title of the task for which you want to mark all subtasks as completed:");
+                scanf("%s", taskTitle);
+                ExistingTask = searchByTaskTitle(ListOfTasks, TaskTitle);
+                
+                if (ExistingTask)
+                    markAllSubtasksAsCompleted(&ExistingTask);
+                else
+                    printf("The title did not match to any existing task. Try again.\n");
+                
+                break;
+                
+            case 13:
+                printf("Enter title of the task whose subtask is to be deleted:");
+                scanf("%s", TaskTitle);
+                ExistingTask = searchByTaskTitle(ListOfTasks, TaskTitle);
+                
+                if (ExistingTask)
+                {
+                    printf("Enter Title of the subtask to be deleted\n");
+                    scanf("%s", subtaskTitle);
+                    deleteSubtask (&(ExistingTask)->TaskDetails.ListOfSubtasks, subtaskTitle);
+                    break;
+                }
+                else
+                    printf("The title did not match to any existing task. Try again.\n");
+                
+                break;
+                
+            case 14:
+                printf("Enter Title of Task whose every subtask is to be deleted.\n");
+                scanf("%s", TaskTitle);
+                ExistingTask = searchByTaskTitle(ListOfTasks, TaskTitle);
+                
+                if (ExistingTask)
+                    deleteSubtaskList(&ExistingTask);
+                else
+                    printf("The title did not match to any existing task. Try again.\n");
+                
+                break;
+                
         }
-    } 
     }
-    
-    
-    /*                                                          TO DISPLAY CALENDAR FOR A MONTH
-     int year,month;
-     
-     printf("Enter the month and year: ");
-     scanf("%d %d", &month, &year);
-     
-     calendar(year, month) ;
-     
-     return 0;
-     */
 }
+
+
+/*                                                          TO DISPLAY CALENDAR FOR A MONTH
+ 
+ 
+ printf("Enter the month and year: ");
+ 
+ 
+ return 0;
+ */
 
