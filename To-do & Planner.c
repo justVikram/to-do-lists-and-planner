@@ -87,139 +87,10 @@ static void initTaskDetails (TASK ** ExistingTask)
     
 }
 
-static void initSubtaskDetails (SUBTASK ** ExistingSubtask)
+static void initSubtaskDetails (SUBTASK_NODE ** ExistingSubtask)
 {
-    strcpy ((*ExistingSubtask)->SubtaskTitle, "<enter subtask title here>");
-    (*ExistingSubtask)->IsCompleted = 0;
-}
-
-//MARK:-
-
-static void readNewTask (TASK_NODE ** NewTask)
-{
-    
-}
-
-static void addNewTask (TASK_NODE ** ListOfTasks, TASK_NODE * NewTask)
-{
-    //ADD AT POSITION
-}
-
-static void viewTask (const TASK_NODE * ExistingTask)
-{
-    
-}
-
-static void viewListOfTasks (const TASK_NODE * ListOfTasks)
-{
-    //IN ASCENDING ORDER BY DATE
-}
-
-static void viewTasksOnGivenDate (const TASK_NODE * ListOfTasks, DATE ScheduledDate)
-{
-    
-}
-
-static void viewCompletedTasks (const TASK_NODE * ListOfTasks)
-{
-    const TASK_NODE *cur = ListOfTasks;
-    SUBTASK_NODE *cur1;
-    
-    while (cur)
-    {
-        if (cur->TaskDetails.IsCompleted == 1)
-        {
-            printf("%s\n", cur->TaskDetails.TaskTitle);
-            cur1 = cur->TaskDetails.ListOfSubtasks;
-            while (cur1)
-            {
-                printf("%s\n", cur1->SubtaskDetails.SubtaskTitle);
-                
-                cur1 = cur1->next;
-            }
-        }
-        cur = cur->next;
-    }
-}
-
-static int searchByTaskTitle(const TASK_NODE *ListOfTasks, char TaskTitle[])
-{
-    const TASK_NODE *cur = ListOfTasks;
-    while (cur)
-    {
-        if (strcmp (cur->TaskDetails.TaskTitle, TaskTitle) == 0)
-            return 1;
-        
-        cur = cur->next;
-    }
-    return 0;
-}
-
-static void markTaskAsCompleted (TASK_NODE ** ListOfTasks, char TaskTitle [])
-{
-    TASK_NODE *cur = (*ListOfTasks);
-    
-    while (cur && (strcmp(cur->TaskDetails.TaskTitle, TaskTitle)) != 0)
-    {
-        
-        cur = cur->next;
-    }
-    if (cur)
-    {
-        cur->TaskDetails.IsCompleted = 1;
-        SUBTASK_NODE *ListOfSubtasks = cur->TaskDetails.ListOfSubtasks;
-        
-        while (ListOfSubtasks)
-        {
-            ListOfSubtasks->SubtaskDetails.IsCompleted = 1;
-            ListOfSubtasks = ListOfSubtasks->next;
-        }
-    }
-}
-
-static void markAllTasksAsCompleted (TASK_NODE ** ListOfTasks)
-{
-    TASK_NODE *cur = (*ListOfTasks);
-    SUBTASK_NODE *cur1;
-    while (cur)
-    {
-        cur->TaskDetails.IsCompleted = 1;
-        cur1 = cur->TaskDetails.ListOfSubtasks;
-        while (cur1)
-        {
-            cur1->SubtaskDetails.IsCompleted = 1;
-            cur1 = cur1->next;
-        }
-        cur = cur->next;
-    }
-}
-
-static void deleteTaskFromList (TASK_NODE ** ListOfTasks, char TaskTitle [])
-{
-    TASK_NODE *cur = *ListOfTasks;
-    TASK_NODE *prev = NULL;
-    while (cur)
-    {
-        if (strcmp(cur->TaskDetails.TaskTitle, TaskTitle) == 0)
-        {
-            if (cur == *ListOfTasks)
-            {
-                *ListOfTasks = cur->next;
-                free(cur);
-            }
-            else
-            {
-                prev->next = cur->next;
-                free(cur);
-                cur = prev->next;
-            }
-        }
-        else
-        {
-            prev = cur;
-            cur = cur->next;
-        }
-    }
+    strcpy ((*ExistingSubtask)->SubtaskDetails.SubtaskTitle, "<enter subtask title here>");
+    (*ExistingSubtask)->SubtaskDetails.IsCompleted = 0;
 }
 
 //MARK:-
@@ -329,6 +200,211 @@ static void deleteSubtaskList (TASK_NODE ** ExistingTask)
 
 //MARK:-
 
+static void readNewTask (TASK_NODE ** NewTask)
+{
+    scanf("%s",(*NewTask)->TaskDetails.TaskTitle);
+    scanf("%d",&(*NewTask)->TaskDetails.ScheduledDate.day);
+    scanf("%d",&(*NewTask)->TaskDetails.ScheduledDate.month);
+    scanf("%d",&(*NewTask)->TaskDetails.ScheduledDate.year);
+    (*NewTask)->next=NULL;
+}
+
+static void addNewTask (TASK_NODE ** ListOfTasks, TASK_NODE * NewTask)
+{
+    //ADD AT POSITION
+    TASK_NODE *cur;
+    char res;
+    if(*ListOfTasks==NULL)
+        *ListOfTasks=NewTask;
+    else
+    {
+        cur=*ListOfTasks;
+        DATE date1 = cur->TaskDetails.ScheduledDate;
+        DATE date2 = NewTask->TaskDetails.ScheduledDate;
+        res = compareDates(date1, date2);
+        if(res<0)  //Add at beginning
+            NewTask->next=cur;
+        else
+        {
+            while(cur && res>=0)
+            {
+                cur=cur->next;
+                date1=cur->TaskDetails.ScheduledDate;
+                date2=NewTask->TaskDetails.ScheduledDate;
+                res = compareDates (date1, date2);
+            }
+            if(res>0)
+            {
+                if(!cur->next) //When ListOfTasks has a single node and add at beginning
+                    cur->next=NewTask;
+                else
+                {
+                    NewTask->next=cur->next; //add in between two nodes
+                    cur->next=NewTask;
+                }
+            }
+            else if(res==0)
+            {
+                SUBTASK_NODE *NewSubtask = NULL;
+                initSubtaskDetails (&NewSubtask);
+                readNewSubtask(&NewSubtask);
+                addNewSubtask(&NewTask,NewSubtask);
+            }
+        }
+    }
+}
+
+static void viewTask (const TASK_NODE * ExistingTask)
+{
+    if (ExistingTask == NULL)
+         printf("No task scheduled.\n");
+    
+     else
+     {
+         printf("%s\n",ExistingTask->TaskDetails.TaskTitle);
+         printf("%d ",ExistingTask->TaskDetails.ScheduledDate.day);
+         printf("%d ",ExistingTask->TaskDetails.ScheduledDate.month);
+         printf("%d\n",ExistingTask->TaskDetails.ScheduledDate.year);
+
+     }
+}
+
+static void viewListOfTasks (const TASK_NODE * ListOfTasks)
+{
+    //IN ASCENDING ORDER BY DATE
+    while(ListOfTasks)
+    {
+        printf("%s",ListOfTasks->TaskDetails.TaskTitle);
+        printf("%d",ListOfTasks->TaskDetails.ScheduledDate.day);
+        printf("%d",ListOfTasks->TaskDetails.ScheduledDate.month);
+        printf("%d",ListOfTasks->TaskDetails.ScheduledDate.year);
+        ListOfTasks=ListOfTasks->next;
+    }
+}
+
+static void viewTasksOnGivenDate (const TASK_NODE * ListOfTasks, DATE GivenDate)
+{
+    const TASK_NODE *cur = ListOfTasks;
+    
+    if(ListOfTasks == NULL)
+        printf("No tasks scheduled.");
+    
+    else
+    {
+        while(cur)
+        {
+            if (! compareDates(cur->TaskDetails.ScheduledDate, GivenDate))
+                viewTask(cur);
+            
+            cur=cur->next;
+        }
+    }
+}
+
+static void viewCompletedTasks (const TASK_NODE * ListOfTasks)
+{
+    const TASK_NODE *cur = ListOfTasks;
+    SUBTASK_NODE *cur1;
+    
+    while (cur)
+    {
+        if (cur->TaskDetails.IsCompleted == 1)
+        {
+            printf("%s\n", cur->TaskDetails.TaskTitle);
+            cur1 = cur->TaskDetails.ListOfSubtasks;
+            while (cur1)
+            {
+                printf("%s\n", cur1->SubtaskDetails.SubtaskTitle);
+                
+                cur1 = cur1->next;
+            }
+        }
+        cur = cur->next;
+    }
+}
+
+static int searchByTaskTitle(const TASK_NODE *ListOfTasks, char TaskTitle[])
+{
+    const TASK_NODE *cur = ListOfTasks;
+    while (cur)
+    {
+        if (strcmp (cur->TaskDetails.TaskTitle, TaskTitle) == 0)
+            return 1;
+        
+        cur = cur->next;
+    }
+    return 0;
+}
+
+static void markTaskAsCompleted (TASK_NODE ** ListOfTasks, char TaskTitle [])
+{
+    TASK_NODE *cur = (*ListOfTasks);
+    
+    while (cur && (strcmp(cur->TaskDetails.TaskTitle, TaskTitle)) != 0)
+    {
+        
+        cur = cur->next;
+    }
+    if (cur)
+    {
+        cur->TaskDetails.IsCompleted = 1;
+        SUBTASK_NODE *ListOfSubtasks = cur->TaskDetails.ListOfSubtasks;
+        
+        while (ListOfSubtasks)
+        {
+            ListOfSubtasks->SubtaskDetails.IsCompleted = 1;
+            ListOfSubtasks = ListOfSubtasks->next;
+        }
+    }
+}
+
+static void markAllTasksAsCompleted (TASK_NODE ** ListOfTasks)
+{
+    TASK_NODE *cur = (*ListOfTasks);
+    SUBTASK_NODE *cur1;
+    while (cur)
+    {
+        cur->TaskDetails.IsCompleted = 1;
+        cur1 = cur->TaskDetails.ListOfSubtasks;
+        while (cur1)
+        {
+            cur1->SubtaskDetails.IsCompleted = 1;
+            cur1 = cur1->next;
+        }
+        cur = cur->next;
+    }
+}
+
+static void deleteTaskFromList (TASK_NODE ** ListOfTasks, char TaskTitle [])
+{
+    TASK_NODE *cur = *ListOfTasks;
+    TASK_NODE *prev = NULL;
+    while (cur)
+    {
+        if (strcmp(cur->TaskDetails.TaskTitle, TaskTitle) == 0)
+        {
+            if (cur == *ListOfTasks)
+            {
+                *ListOfTasks = cur->next;
+                free(cur);
+            }
+            else
+            {
+                prev->next = cur->next;
+                free(cur);
+                cur = prev->next;
+            }
+        }
+        else
+        {
+            prev = cur;
+            cur = cur->next;
+        }
+    }
+}
+
+//MARK:-
+
 static int isLeapYear (int y)
 {
     return (y % 400 == 0) || ((y % 4 == 0) && (y % 100 != 0));
@@ -402,3 +478,4 @@ int main (int argV, const char * argC [])
      return 0;
      */
 }
+
