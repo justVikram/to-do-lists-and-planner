@@ -465,32 +465,24 @@ static void calendar (int y, int m) /* display calendar at m y */
 
 int main (int argV, const char * argC [])
 {
-    TASK_NODE * ListOfTasks;
-
-
-
+    TASK_NODE *ListOfTasks;
     initListOfTasks(&ListOfTasks);
 
     while (1)
     {
         int ch;
         printf("enter choice");
-        scanf("%d",&ch);
+        scanf("%d", &ch);
 
         switch (ch)
         {
-        case 1:printf("add new task\n");
-        TASK_NODE  *newtask=(TASK_NODE*)malloc(sizeof(TASK_NODE));
+        case 1:
+            printf("add new task\n");
+            TASK_NODE *NewTask = (TASK_NODE *)malloc(sizeof(TASK_NODE));
 
-           /* constant-expression */
-            /* code */
-            break;
-        
-        default:
-            break;
+            
         }
-
-        /* code */
+    } 
     }
     
     
