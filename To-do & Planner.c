@@ -466,6 +466,33 @@ static void calendar (int y, int m) /* display calendar at m y */
 int main (int argV, const char * argC [])
 {
     TASK_NODE * ListOfTasks;
+
+
+
+    initListOfTasks(&ListOfTasks);
+
+    while (1)
+    {
+        int ch;
+        printf("enter choice");
+        scanf("%d",&ch);
+
+        switch (ch)
+        {
+        case 1:printf("add new task\n");
+        TASK_NODE  *newtask=(TASK_NODE*)malloc(sizeof(TASK_NODE));
+
+           /* constant-expression */
+            /* code */
+            break;
+        
+        default:
+            break;
+        }
+
+        /* code */
+    }
+    
     
     /*                                                          TO DISPLAY CALENDAR FOR A MONTH
      int year,month;
@@ -473,7 +500,7 @@ int main (int argV, const char * argC [])
      printf("Enter the month and year: ");
      scanf("%d %d", &month, &year);
      
-     calendar(year, month);
+     calendar(year, month) ;
      
      return 0;
      */
