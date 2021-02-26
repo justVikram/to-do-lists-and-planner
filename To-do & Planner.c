@@ -720,14 +720,3 @@ int main (int argV, const char * argC [])
         }
     }
 }
-
-
-/*                                                          TO DISPLAY CALENDAR FOR A MONTH
- 
- 
- printf("Enter the month and year: ");
- 
- 
- return 0;
- */
-
